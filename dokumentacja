@@ -1,0 +1,107 @@
+1. Charakterystyka oprogramowania
+a. Nazwa skrócona:
+WineQual
+b. Nazwa pełna:
+Aplikacja do oceny jakości wina. 
+c. Krótki opis ze wskazaniem celów
+WineQual to prosta aplikacja do oceny jakości wina, która umożliwia użytkownikowi wprowadzenie danych dla takich parametrów jak kwasowość, zawartość cukru, siarczany, gęstość, zawartość alkoholu i innych, aby oszacować jakość wina. Celem aplikacji jest ułatwienie szybkiej oceny wina na podstawie obiektywnych danych, co jest przydatne zarówno dla entuzjastów wina, jak i osób zawodowo związanych z produkcją wina.
+2. Prawa autorskie
+a. Autorzy:
+Zespół projektowy: Piotr Pepliński, Piotr Sobański, Magdalena Nowakowska
+b. Warunki licencyjne do oprogramowania wytworzonego przez grupę:
+Licencja open-source (np. MIT) – umożliwiająca swobodne korzystanie i modyfikowanie kodu.
+3. Specyfikacja wymagań
+Specyfikacja wymagań w formie tabeli
+Identyfikator
+Nazwa
+Opis
+Priorytet
+Kategoria
+WYM-001
+Wprowadzenie danych
+Użytkownik może wprowadzić dane dla każdego parametru wina: kwasowość, cukier, pH, alkohol itp.
+1
+Funkcjonalne
+WYM-002
+Wyświetlanie oceny
+Aplikacja pokazuje ocenę jakości wina na podstawie wprowadzonych danych
+1
+Funkcjonalne
+WYM-003
+Obliczenia automatyczne
+Aplikacja automatycznie oblicza wynik na podstawie zdefiniowanego algorytmu
+1
+Funkcjonalne
+WYM-004
+Prosty interfejs
+Minimalistyczny design z głównymi elementami na jednym ekranie
+1
+Pozafunkcjonalne
+WYM-005
+Walidacja danych
+Sprawdzenie poprawności danych przed obliczeniami, np. czy wartości są liczbami
+2
+Funkcjonalne
+WYM-006
+Przycisk Reset
+Przycisk resetujący wprowadzone dane
+2
+Funkcjonalne
+WYM-007
+Instrukcja użytkownika
+Wyświetlana w aplikacji instrukcja korzystania z niej
+3
+Pozafunkcjonalne
+
+4. Architektura systemu/oprogramowania
+a. Architektura rozwoju – stos technologiczny
+Nazwa
+Przeznaczenie
+Wersja
+Python (np. Flask)
+Backend, obliczenia
+3.x
+GitHub
+Kontrola wersji
+Najnowsza
+
+b. Architektura uruchomieniowa – stos technologiczny
+Nazwa
+Przeznaczenie
+Wersja
+Przeglądarka WWW
+Wykonywanie aplikacji
+Najnowsza
+Flask (Python)
+Uruchomienie backendu aplikacji
+3.x
+
+5. Testowanie
+a. Scenariusze testów
+Test ID
+Scenariusz
+Oczekiwany wynik
+TEST-001
+Użytkownik wprowadza dane dla każdego parametru
+Dane są przyjmowane poprawnie
+TEST-002
+Użytkownik klika przycisk obliczeń
+Wyświetla się wynik
+TEST-003
+Użytkownik wprowadza niepoprawne dane
+Aplikacja informuje o błędnym formacie danych
+TEST-004
+Użytkownik klika przycisk reset
+Wszystkie pola są puste
+
+b. Sprawozdanie z wykonania scenariuszy testów
+Zostanie wypełnione po wykonaniu testów – w formie raportu dla każdego testu.
+
+
+
+
+
+
+
+
+
