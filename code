@@ -1,0 +1,135 @@
+train_model.py:
+
+import pandas as pd # Do przetwarzania danych (ładowanie i manipulacja danymi w DataFrame).
+from sklearn.model_selection import train_test_split # Funkcja dzieląca dane na zestawy treningowe i testowe.
+from sklearn.linear_model import LogisticRegression # Klasa z modułu sklearn, która pozwala trenować model regresji logistycznej.
+from sklearn.metrics import accuracy_score # Funkcja służąca do obliczenia dokładności modelu.
+from sklearn.preprocessing import StandardScaler # Narzędzie do standaryzacji cech (skalowanie danych).
+import pickle # Biblioteka do serializacji (zapisywania obiektów, takich jak modele) w plikach binarnych.
+
+file_path = "WineQT.csv" # Ścieżka do pliku z danymi
+data = pd.read_csv(file_path) # Ładowanie danych z pliku CSV do obiektu DataFrame.
+df = pd.DataFrame(data)
+
+if 'Id' in df.columns:
+    df = df.drop('Id', axis=1) # usunięcie kolumny Id z bazy danych (jeśli istnieje)
+
+X = df.drop('quality', axis=1) # Zmienne objaśniające
+y = df['quality'] # Zmienna objaśniana
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42) # Podział danych na zbiór uczący i testowy
+
+scaler = StandardScaler() # Skalowanie danych do średniej 0 i odchylenia standardowego 1.
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+model = LogisticRegression(max_iter=500) # Stworzenie modelu regresji logistycznej
+model.fit(X_train_scaled, y_train) # Trenowanie modelu
+
+accuracy = accuracy_score(y_test, model.predict(X_test_scaled)) # Obliczenie dokładności modelu
+print(f'Model accuracy: {accuracy * 100:.2f}%')
+
+with open('model.pkl', 'wb') as model_file:
+    pickle.dump(model, model_file) # Zapisanie modelu
+with open('scaler.pkl', 'wb') as scaler_file:
+    pickle.dump(scaler, scaler_file) # Zapisanie skalera
+
+-----------------------------------------------------------------------------------------------
+
+app.py:
+
+from flask import Flask, render_template, request
+import pickle
+
+# Tworzenie aplikacji Flask
+app = Flask(__name__)
+
+# Wczytanie modelu i skalera
+with open('model.pkl', 'rb') as model_file:
+    model = pickle.load(model_file)
+
+with open('scaler.pkl', 'rb') as scaler_file:
+    scaler = pickle.load(scaler_file)
+
+@app.route("/", methods=["GET", "POST"])
+def predict_quality():
+    quality = None  # Zmienna przechowująca wynik przewidywania
+    if request.method == "POST":  # Sprawdzenie, czy żądanie ma metodę POST
+        try:
+            # Pobieranie danych wejściowych z formularza HTML
+            input_features = [
+                'fixed acidity', 'volatile acidity', 'citric acid', 'residual sugar',
+                'chlorides', 'free sulfur dioxide', 'total sulfur dioxide', 'density',
+                'pH', 'sulphates', 'alcohol'
+            ]
+            input_data = [float(request.form[feature]) for feature in input_features]  # Konwersja wartości na liczby zmiennoprzecinkowe
+
+            # Skalowanie danych wejściowych
+            input_data_scaled = scaler.transform([input_data])
+
+            # Przewidywanie jakości wina
+            quality = model.predict(input_data_scaled)[0]
+        except Exception as e:
+            quality = f"Błąd: {e}"  # Obsługa błędów w przypadku problemów z danymi wejściowymi
+
+    return render_template("index.html", quality=quality)  # Renderowanie strony HTML z wynikiem przewidywania
+
+# Uruchomienie aplikacji
+if __name__ == "__main__":
+    app.run(debug=True)  # Uruchomienie serwera Flask w trybie debugowania
+
+-----------------------------------------------------------------------------------------------
+
+index.html:
+
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prognozowanie jakości wina</title>
+</head>
+<body>
+    <h1>Prognozowanie jakości wina</h1>
+    <form method="POST">
+        <label for="fixed_acidity">Kwasy stałe (4 - 16 g/L):</label>
+        <input type="number" id="fixed_acidity" name="fixed acidity" min="4" max="16" step="0.1" value="{{ request.form.get('fixed acidity', '') }}" required><br>
+
+        <label for="volatile_acidity">Kwasy lotne (0.1 - 1.6 g/L):</label>
+        <input type="number" id="volatile_acidity" name="volatile acidity" min="0.1" max="1.6" step="0.1" value="{{ request.form.get('volatile acidity', '') }}" required><br>
+
+        <label for="citric_acid">Kwas cytrynowy (0 - 1 g/L):</label>
+        <input type="number" id="citric_acid" name="citric acid" min="0" max="1" step="0.01" value="{{ request.form.get('citric acid', '') }}" required><br>
+
+        <label for="residual_sugar">Cukier resztkowy (0 - 16 g/L):</label>
+        <input type="number" id="residual_sugar" name="residual sugar" min="0" max="16" step="0.1" value="{{ request.form.get('residual sugar', '') }}" required><br>
+
+        <label for="chlorides">Chlorki (0.01 - 0.1 g/L):</label>
+        <input type="number" id="chlorides" name="chlorides" min="0.01" max="0.1" step="0.01" value="{{ request.form.get('chlorides', '') }}" required><br>
+
+        <label for="free_sulfur_dioxide">Wolny dwutlenek siarki (5 - 60 mg/L):</label>
+        <input type="number" id="free_sulfur_dioxide" name="free sulfur dioxide" min="5" max="60" step="1" value="{{ request.form.get('free sulfur dioxide', '') }}" required><br>
+
+        <label for="total_sulfur_dioxide">Całkowity dwutlenek siarki (20 - 150 mg/L):</label>
+        <input type="number" id="total_sulfur_dioxide" name="total sulfur dioxide" min="20" max="150" step="1" value="{{ request.form.get('total sulfur dioxide', '') }}" required><br>
+
+        <label for="density">Gęstość (0.99 - 1.05 g/cm3):</label>
+        <input type="number" id="density" name="density" min="0.99" max="1.05" step="0.001" value="{{ request.form.get('density', '') }}" required><br>
+
+        <label for="ph">pH (2.7 - 4.0):</label>
+        <input type="number" id="ph" name="pH" min="2.7" max="4.0" step="0.01" value="{{ request.form.get('pH', '') }}" required><br>
+
+        <label for="sulphates">Siarkowodory (0.2 - 2.0 g/L):</label>
+        <input type="number" id="sulphates" name="sulphates" min="0.2" max="2.0" step="0.01" value="{{ request.form.get('sulphates', '') }}" required><br>
+
+        <label for="alcohol">Alkohol (8 - 15 %):</label>
+        <input type="number" id="alcohol" name="alcohol" min="8" max="15" step="0.1" value="{{ request.form.get('alcohol', '') }}" required><br>
+
+        <button type="submit">Zatwierdź</button>
+    </form>
+
+    {% if quality %}
+        <h2>Prognozowana jakość wina: {{ quality }}</h2>
+    {% endif %}
+</body>
+</html>
